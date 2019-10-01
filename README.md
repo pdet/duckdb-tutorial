@@ -15,9 +15,17 @@ Withing folder 'exercise_1' you will find the following scripts:
 * duckdb_benchmark.py -> Is a skeleton for the duckdb loader you will be implementing.
 
 ### ML Pipeline
+(1) Preprocessing
+All the data is loaded 
 
 ### Your goal
 Your goal is to perform the same ML task but now using duckdb. Use the duckdb_benchmark.py as a guide, the script is a skeleton to help you in implementing this integration. Check the comments for hints ;-)
+
+To Download the datasets and execute the pipeline in sqlserver you must execute the setup.py and the sqlite_benchmark.py scripts:
+```bash
+python3 setup.py
+python3 sqlite_benchmark.py
+```
 
 ## (2) UDF in DuckDB.
 ### Requirements

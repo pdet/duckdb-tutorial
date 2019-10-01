@@ -2,3 +2,9 @@ exercise_1/ncvoter_allc_utf.txt
 exercise_1/ncvoter_allc_utf.txt.bz2
 exercise_1/rprecinct_votes.tsv
 */.DS_Store
+exercise_1/ncvoter_sample.tsv
+exercise_1/ncvoter_sample.tsv.zip
+exercise_1/rprecinctvotes.tsv
+exercise_1/sqlite_benchmark.py
+exercise_1/voters_sqlite.db.zip
+exercise_1/voters_sqlite.db

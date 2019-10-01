@@ -14,13 +14,16 @@ except ImportError:
 try: import sqlite3
 except ImportError:
 	install('sqlite3')
-try: import pandas
+try: import numpy
 except ImportError:
-	install('pandas')
-try: import bz2
+	install('numpy')
+try: import sklearn
 except ImportError:
-	install('bz2')
-	import bz2
+	install('sklearn')
+try: import zipfile
+except ImportError:
+	install('zipfile')
+	import zipfile
 try: import inspect
 except ImportError:
 	install('inspect')
@@ -34,15 +37,18 @@ SCRIPT_PATH =  os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfr
 os.chdir(SCRIPT_PATH)
 
 print("Downloading dataset")
-if not os.path.isfile("ncvoter_allc_utf.txt.bz2"):
-	urllib.urlretrieve("https://zenodo.org/record/2589451/files/ncvoter_allc_utf.txt.bz2?download=1", "ncvoter_allc_utf.txt.bz2")
-if not os.path.isfile("ncvoter_allc_utf.txt.bz2"):
-	urllib.urlretrieve("https://zenodo.org/record/2589451/files/precinct_votes.tsv?download=1", "rprecinct_votes.tsv")
+if not os.path.isfile("ncvoter_sample.tsv.zip"):
+	urllib.urlretrieve("https://zenodo.org/record/3466870/files/ncvoter_sample.tsv.zip?download=1", "ncvoter_sample.tsv.zip")
+if not os.path.isfile("rprecinctvotes.tsv.zip"):
+	urllib.urlretrieve("https://zenodo.org/record/3466870/files/rprecinctvotes.tsv?download=1", "rprecinctvotes.tsv")
+if not os.path.isfile("voters_sqlite.db.zip"):
+	urllib.urlretrieve("https://zenodo.org/record/3466870/files/voters_sqlite.db.zip?download=1", "voters_sqlite.db.zip")
 
 print("Decompressing files")
-if not os.path.isfile("ncvoter_allc_utf.txt"):
-	filepath = "ncvoter_allc_utf.txt.bz2"
-	zipfile = bz2.BZ2File(filepath)
-	data = zipfile.read() 
-	newfilepath = filepath[:-4] 
-	open(newfilepath, 'wb').write(data)
+if not os.path.isfile("ncvoter_sample.tsv"):
+	with zipfile.ZipFile("ncvoter_sample.tsv.zip","r") as zip_ref:
+		zip_ref.extractall(SCRIPT_PATH)
+
+if not os.path.isfile("voters_sqlite.db"):
+	with zipfile.ZipFile("voters_sqlite.db.zip","r") as zip_ref:
+		zip_ref.extractall(SCRIPT_PATH)
