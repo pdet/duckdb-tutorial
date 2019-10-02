@@ -38,11 +38,11 @@ os.chdir(SCRIPT_PATH)
 
 print("Downloading dataset")
 if not os.path.isfile("ncvoter_sample.tsv.zip"):
-	urllib.urlretrieve("https://zenodo.org/record/3466870/files/ncvoter_sample.tsv.zip?download=1", "ncvoter_sample.tsv.zip")
+	urllib.request.urlretrieve("https://zenodo.org/record/3466870/files/ncvoter_sample.tsv.zip?download=1", "ncvoter_sample.tsv.zip")
 if not os.path.isfile("rprecinctvotes.tsv.zip"):
-	urllib.urlretrieve("https://zenodo.org/record/3466870/files/rprecinctvotes.tsv?download=1", "rprecinctvotes.tsv")
+	urllib.request.urlretrieve("https://zenodo.org/record/3466870/files/precinct_votes.tsv?download=1", "precinctvotes.tsv")
 if not os.path.isfile("voters_sqlite.db.zip"):
-	urllib.urlretrieve("https://zenodo.org/record/3466870/files/voters_sqlite.db.zip?download=1", "voters_sqlite.db.zip")
+	urllib.request.urlretrieve("https://zenodo.org/record/3466870/files/voters_sqlite.db.zip?download=1", "voters_sqlite.db.zip")
 
 print("Decompressing files")
 if not os.path.isfile("ncvoter_sample.tsv"):
