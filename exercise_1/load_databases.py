@@ -3,7 +3,7 @@ import duckdb
 import os
 import inspect
 import time
-from pandas import DataFrame
+import pandas
 
 SCRIPT_PATH =  os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 os.chdir(SCRIPT_PATH)
@@ -29,8 +29,8 @@ def load_sqlite():
 
 
 def load_pandas():
-	ncvoters_pandas = DataFrame.read_csv('ncvoter_sample.tsv', sep='\t')
-	precinctvotes_pandas = DataFrame.read_csv('precinctvotes.tsv', sep='\t')
+	ncvoters_pandas = pandas.read_csv('ncvoter_sample.tsv', sep='\t', low_memory=False)
+	precinctvotes_pandas = pandas.read_csv('precinctvotes.tsv', sep='\t', low_memory=False)
 
 def load_duckdb():
 	if os.path.isfile("voters_duck.db"):
@@ -41,7 +41,7 @@ def load_duckdb():
 	cursor.execute(CREATE_PRECINCTVOTES_SQL)
 	cursor.execute("COPY ncvoters FROM 'ncvoter_sample.tsv' DELIMITER '\t'")
 	cursor.execute("COPY precinct_votes FROM 'precinctvotes.tsv' DELIMITER '\t'")
-	db.close()
+	# db.close()
 
 start = time.time()
 load_sqlite()

@@ -8,6 +8,9 @@ def install(package):
 try: import duckdb
 except ImportError:
 	install('duckdb')
+try: import pandas
+except ImportError:
+	install('pandas')
 try: import urllib
 except ImportError:
 	install('urllib')
@@ -17,9 +20,6 @@ except ImportError:
 try: import numpy
 except ImportError:
 	install('numpy')
-try: import sklearn
-except ImportError:
-	install('sklearn')
 try: import zipfile
 except ImportError:
 	install('zipfile')
