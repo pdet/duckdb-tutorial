@@ -28,7 +28,9 @@ python3 setup.py
 python3 sqlite_benchmark.py
 ```
 
-## (2) UDF in DuckDB.
+## (2) Implementing Scalar Functions in DuckDB.
+In this assignment, we will implement our own scalar function in DuckDB.
+
 ### Requirements
 DuckDB requires [CMake](https://cmake.org) to be installed and a `C++11` compliant compiler. GCC 4.9 and newer, Clang 3.9 and newer and VisualStudio 2017 are tested on each revision, but any `C++11` compliant compiler should work.
 
