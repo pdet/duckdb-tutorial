@@ -13,3 +13,4 @@ precinctvotes.tsv
 voters_duck.db
 voters_duck.db.wal
 .DS_Store
+.idea/
