@@ -19,11 +19,23 @@ duck_db = duckdb.connect('voters_duck.db')
 duck_cursor = duck_db.cursor()
 
 query_01 = ''' SELECT COUNT(*) FROM ncvoters WHERE ncvoters.status_cd='A'  '''
-query_02 = ''' SELECT  romney_percentage, county_id, precinct, sex_code, race_code, ethnic_code, birth_age
+query_02 = ''' SELECT birth_age,COUNT(*) FROM ncvoters GROUP BY birth_age HAVING birth_age =70  '''
+
+query_03 = '''
+SELECT  county_id, romney_percentage,count(*) as total_white
 FROM precinct_votes
 INNER JOIN ncvoters
 ON ncvoters.precinct_desc=precinct_votes.precinct AND ncvoters.county_desc=precinct_votes.county
-WHERE ncvoters.status_cd='A'  '''
+WHERE ncvoters.status_cd='A' and sex_code = 'M' and race_code = 'W' and birth_age > 40 group by county_id
+order by  total_white desc Limit 3'''
+
+query_03_duck = '''
+SELECT  county_id, first(romney_percentage),count(*) as total_white
+FROM precinct_votes
+INNER JOIN ncvoters
+ON ncvoters.precinct_desc=precinct_votes.precinct AND ncvoters.county_desc=precinct_votes.county
+WHERE ncvoters.status_cd='A' and sex_code = 'M' and race_code = 'W' and birth_age > 40 group by county_id
+order by  total_white desc Limit 3'''
 
 def query_01_pandas():
 	pandas_query = ncvoters_pandas[["county_id"]][(ncvoters_pandas.status_cd == 'A')]
@@ -56,27 +68,33 @@ def query_02_duckdb():
 	print(result)
 
 def query_03_pandas():
+
+	# result = ncvoters_pandas.groupby(['county_id','race_code']).agg({'county_desc': 'count'})
+	# print(result[result.race_code.index == 'B' > result.race_code.index == 'W'])
 	return;
 
 def query_03_sqlite():
-	return;
+	sqlite_cursor.execute(query_03)
+	result = sqlite_cursor.fetchall()
+	print(result)
 
 def query_03_duckdb():
-	return;
-
+	duck_cursor.execute(query_03_duck)
+	result = duck_cursor.fetchall()
+	print(result)
 
 
 start = time.time()
-query_02_pandas()
+query_03_pandas()
 end = time.time()
 print("Query in pandas : " +str(end - start))
 
 start = time.time()
-query_02_sqlite()
+query_03_sqlite()
 end = time.time()
 print("Query in sqlite : " +str(end - start))
 
 start = time.time()
-query_02_duckdb()
+query_03_duckdb()
 end = time.time()
 print("Query in duckdb : " +str(end - start))
