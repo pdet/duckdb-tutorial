@@ -12,11 +12,43 @@ ncvoters_pandas = pandas.read_csv('ncvoter_sample.tsv', sep='\t', low_memory=Fal
 precinctvotes_pandas = pandas.read_csv('precinctvotes.tsv', sep='\t', low_memory=False, names = ["county", "precinct", "total_votes", "romney_percentage"])
 
 
+CREATE_NCVOTERS_SQL = '''
+    CREATE TABLE IF NOT EXISTS ncvoters(county_id STRING, county_desc STRING, voter_reg_num STRING,status_cd STRING, voter_status_desc STRING, reason_cd STRING, voter_status_reason_desc STRING, absent_ind STRING, name_prefx_cd STRING,last_name STRING, first_name STRING, midl_name STRING, name_sufx_cd STRING, full_name_rep STRING,full_name_mail STRING, house_num STRING, half_code STRING, street_dir STRING, street_name STRING, street_type_cd STRING, street_sufx_cd STRING, unit_designator STRING, unit_num STRING, res_city_desc STRING,state_cd STRING, zip_code STRING, res_street_address STRING, res_city_state_zip STRING, mail_addr1 STRING, mail_addr2 STRING, mail_addr3 STRING, mail_addr4 STRING, mail_city STRING, mail_state STRING, mail_zipcode STRING, mail_city_state_zip STRING, area_cd STRING, phone_num STRING, full_phone_number STRING, drivers_lic STRING, race_code STRING, race_desc STRING, ethnic_code STRING, ethnic_desc STRING, party_cd STRING, party_desc STRING, sex_code STRING, sex STRING, birth_age INTEGER, birth_place STRING, registr_dt STRING, precinct_abbrv STRING, precinct_desc STRING,municipality_abbrv STRING, municipality_desc STRING, ward_abbrv STRING, ward_desc STRING, cong_dist_abbrv STRING, cong_dist_desc STRING, super_court_abbrv STRING, super_court_desc STRING, judic_dist_abbrv STRING, judic_dist_desc STRING, nc_senate_abbrv STRING, nc_senate_desc STRING, nc_house_abbrv STRING, nc_house_desc STRING,county_commiss_abbrv STRING, county_commiss_desc STRING, township_abbrv STRING, township_desc STRING,school_dist_abbrv STRING, school_dist_desc STRING, fire_dist_abbrv STRING, fire_dist_desc STRING, water_dist_abbrv STRING, water_dist_desc STRING, sewer_dist_abbrv STRING, sewer_dist_desc STRING, sanit_dist_abbrv STRING, sanit_dist_desc STRING, rescue_dist_abbrv STRING, rescue_dist_desc STRING, munic_dist_abbrv STRING, munic_dist_desc STRING, dist_1_abbrv STRING, dist_1_desc STRING, dist_2_abbrv STRING, dist_2_desc STRING, confidential_ind STRING, age STRING, ncid STRING, vtd_abbrv STRING, vtd_desc STRING);
+'''
+
+CREATE_PRECINCTVOTES_SQL = '''
+CREATE TABLE IF NOT EXISTS precinct_votes(county STRING, precinct STRING, total_votes INT, romney_percentage DOUBLE);
+'''
+
+
+def load_sqlite():
+	if os.path.isfile("voters_sqlite.db"):
+		os.system("rm voters_sqlite.db")
+	db = sqlite3.connect('voters_sqlite.db')
+	cursor = db.cursor()
+	cursor.execute(CREATE_NCVOTERS_SQL)
+	cursor.execute(CREATE_PRECINCTVOTES_SQL)
+	db.commit()
+	db.close()
+	os.system("sqlite3 voters_sqlite.db < sqlite_import_tsv.sql")
+
+
+def load_duckdb():
+	if os.path.isfile("voters_duck.db"):
+		os.system("rm voters_duck.db")
+	db = duckdb.connect('voters_duck.db')
+	cursor = db.cursor()
+	cursor.execute(CREATE_NCVOTERS_SQL)
+	cursor.execute(CREATE_PRECINCTVOTES_SQL)
+	cursor.execute("COPY ncvoters FROM 'ncvoter_sample.tsv' DELIMITER '\t'")
+	cursor.execute("COPY precinct_votes FROM 'precinctvotes.tsv' DELIMITER '\t'")
+	return cursor
+
+load_sqlite()
 sqlite_db = sqlite3.connect('voters_sqlite.db')
 sqlite_cursor = sqlite_db.cursor()
 
-duck_db = duckdb.connect('voters_duck.db')
-duck_cursor = duck_db.cursor()
+duck_cursor = load_duckdb()
 
 query_01 = ''' SELECT COUNT(*) FROM ncvoters WHERE ncvoters.status_cd='A'  '''
 query_02 = ''' SELECT birth_age,COUNT(*) FROM ncvoters GROUP BY birth_age HAVING birth_age =70  '''
@@ -37,11 +69,15 @@ ON ncvoters.precinct_desc=precinct_votes.precinct AND ncvoters.county_desc=preci
 WHERE ncvoters.status_cd='A' and sex_code = 'M' and race_code = 'W' and birth_age > 40 group by county_id
 order by  total_white desc Limit 3'''
 
-def query_01_pandas():
-	pandas_query = ncvoters_pandas[["county_id"]][(ncvoters_pandas.status_cd == 'A')]
+query_04a = '''DELETE FROM ncvoters WHERE birth_age < 18 OR birth_age > 120'''
+query_04b = query_01
+def query_01_pandas_df(df):
+	pandas_query = df[["county_id"]][(df.status_cd == 'A')]
 	result = (pandas_query.county_id).count()
 	print (result)
-	return;
+
+def query_01_pandas():
+	query_01_pandas_df(ncvoters_pandas)
 
 def query_01_sqlite():
 	sqlite_cursor.execute(query_01)
@@ -83,6 +119,24 @@ def query_03_duckdb():
 	result = duck_cursor.fetchall()
 	print(result)
 
+def query_04_pandas():
+	birth_age_gt_18 = ncvoters_pandas['birth_age'] >= 18
+	birth_age_lt_120 =  ncvoters_pandas['birth_age'] <= 120
+	result = ncvoters_pandas[birth_age_gt_18 & birth_age_lt_120]
+	result.to_csv('result.tsv.tmp', sep='\t')
+	query_01_pandas_df(result)
+
+def query_04_sqlite():
+	sqlite_cursor.execute(query_04a)
+	sqlite_cursor.execute(query_04b)
+	result = sqlite_cursor.fetchone()
+	print(result)
+
+def query_04_duckdb():
+	duck_cursor.execute(query_04a)
+	duck_cursor.execute(query_04b)
+	result = duck_cursor.fetchone()
+	print(result)
 
 start = time.time()
 query_03_pandas()
@@ -98,3 +152,6 @@ start = time.time()
 query_03_duckdb()
 end = time.time()
 print("Query in duckdb : " +str(end - start))
+
+if os.path.isfile('result.tsv.tmp'):
+	os.system("rm result.tsv.tmp")
