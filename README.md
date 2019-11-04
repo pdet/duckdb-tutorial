@@ -9,24 +9,18 @@ For this exercise, you will need [python3](https://www.python.org/) and [pip](ht
 ### Files
 Withing folder 'exercise_1' you will find the following scripts:
 * setup.py -> It downloads all dependencies, the data that will be used in this exercise and decompresses it.
-* sqlite_load.py -> It loads the data (as is) into a 'voters_sqlite.db' sqlite instance.
-* sqlite_benchmark.py -> It performs the full ML Pipeline, and prints out the time spent on the database queries.
-* duckdb_load.py -> Is a skeleton for the duckdb loader you will be implementing.
-* duckdb_benchmark.py -> Is a skeleton for the duckdb loader you will be implementing.
-
-### ML Pipeline
-(1) Preprocessing
-All the data is loaded 
+* load_databases.py -> It loads the data (as is) into a 'voters_sqlite.db' sqlite instance.
+* query_databases.py -> Runs the queries for the different database systems.
 
 ### Your goal
-Your goal is to perform the same ML task but now using duckdb. Use the duckdb_benchmark.py as a guide, the script is a skeleton to help you in implementing this integration. Check the comments for hints ;-)
+Your goal is to load the data into DuckDB, and run the following set of assignments:
 
-To download the datasets and execute the pipeline in SQLite you must execute the setup.py and the sqlite_benchmark.py scripts:
+**Query Q1:** How many people voted in the elections?
+**Queries Q2:** How many people over 70 can vote in the election?
+**Queries Q3:** What are the three counties with most male, white man over 40 and are they majority democrats or republicans? 
+**Transactions Q1:** Q1, but first delete rows with people who are either below 18 years old or over 120 years old
 
-```bash
-python3 setup.py
-python3 sqlite_benchmark.py
-```
+Run them using both SQLite, DuckDB and Pandas and time the execution of these queries.
 
 ## (2) Implementing Scalar Functions in DuckDB.
 In this assignment, we will implement our own scalar function in DuckDB.

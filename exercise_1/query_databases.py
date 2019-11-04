@@ -50,16 +50,13 @@ sqlite_cursor = sqlite_db.cursor()
 
 duck_cursor = load_duckdb()
 
-query_01 = ''' SELECT COUNT(*) FROM ncvoters WHERE ncvoters.status_cd='A'  '''
-query_02 = ''' SELECT birth_age,COUNT(*) FROM ncvoters GROUP BY birth_age HAVING birth_age =70  '''
+# Fill queries here!
+
+query_01 = ''' '''
+query_02 = ''' '''
 
 query_03 = '''
-SELECT  county_id, romney_percentage,count(*) as total_white
-FROM precinct_votes
-INNER JOIN ncvoters
-ON ncvoters.precinct_desc=precinct_votes.precinct AND ncvoters.county_desc=precinct_votes.county
-WHERE ncvoters.status_cd='A' and sex_code = 'M' and race_code = 'W' and birth_age > 40 group by county_id
-order by  total_white desc Limit 3'''
+'''
 
 query_03_duck = '''
 SELECT county_id, first(romney_percentage),count(*) as total_white
@@ -68,6 +65,7 @@ INNER JOIN ncvoters
 ON ncvoters.precinct_desc=precinct_votes.precinct AND ncvoters.county_desc=precinct_votes.county
 WHERE ncvoters.status_cd='A' and sex_code = 'M' and race_code = 'W' and birth_age > 40 group by county_id
 order by  total_white desc Limit 3'''
+
 
 query_04a = '''DELETE FROM ncvoters WHERE birth_age < 18 OR birth_age > 120'''
 query_04b = query_01
@@ -107,15 +105,15 @@ WHERE ncvoters.status_cd=‘A' AND sex_code = 'M'
   AND race_code = ‘W' AND birth_age > 40
 
 def query_03_pandas():
-voter_status = ncvoters_pandas['status_cd'] == 'A'
-race_code = ncvoters_pandas['race_code'] == 'W'
-birth_age = ncvoters_pandas['birth_age'] > 40
-sex_code = ncvoters_pandas['sex_code'] = 'M'
-ncvoters_pandas[voter_status & race_code & birth_age & sex_code].join(precinctvotes_pandas, on="precinct")[]
-
+	voter_status = ncvoters_pandas['status_cd'] == 'A'
+	race_code = ncvoters_pandas['race_code'] == 'W'
+	birth_age = ncvoters_pandas['birth_age'] > 40
+	sex_code = ncvoters_pandas['sex_code'] = 'M'
+	ncvoters_pandas[voter_status & race_code & birth_age & sex_code].join(precinctvotes_pandas, on="precinct")[]
 	return
 	# result = ncvoters_pandas.groupby(['county_id','race_code']).agg({'county_desc': 'count'})
 	# print(result[result.race_code.index == 'B' > result.race_code.index == 'W'])
+
 
 def query_03_sqlite():
 	sqlite_cursor.execute(query_03)

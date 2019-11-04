@@ -39,9 +39,9 @@ def load_duckdb():
 	cursor = db.cursor()
 	cursor.execute(CREATE_NCVOTERS_SQL)
 	cursor.execute(CREATE_PRECINCTVOTES_SQL)
-	cursor.execute("COPY ncvoters FROM 'ncvoter_sample.tsv' DELIMITER '\t'")
-	cursor.execute("COPY precinct_votes FROM 'precinctvotes.tsv' DELIMITER '\t'")
-	# db.close()
+	# Fill queries here!
+	cursor.execute(" ")
+	cursor.execute(" ")
 
 start = time.time()
 load_sqlite()
