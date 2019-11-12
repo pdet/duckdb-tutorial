@@ -1,26 +1,14 @@
 # DuckDB Tutorial for SBBD
-This tutorial is composed of two exercises. In the first exercise, students will  integrate a ML pipeline into DuckDB and compare its performance with SQLite. The ML model's goal is to perform classification of voters in North Carolina. Predicting which party voters will vote for in the upcoming election based on the previous election results. The second exercise is about implementing a User Defined Function (UDF) inside DuckDB.
+This tutorial is composed of two exercises. In the first exercise, students will compare DuckDB,SQLite and Pandas in terms of performance and usability. The second exercise is about implementing a User Defined Function (UDF) inside DuckDB.
 
-## (1) Voter Classification - ML Pipeline Integration.
+## (1) Using DuckDB.
 
 ### Requirements
-For this exercise, you will need [python3](https://www.python.org/) and [pip](https://pypi.org/project/pip/) installed in your machine. All other dependencies and data will be automatically installed with the scripts.
+For this exercise, you will need a [Google Colab Account](https://colab.research.google.com/).
 
-### Files
-Withing folder 'exercise_1' you will find the following scripts:
-* setup.py -> It downloads all dependencies, the data that will be used in this exercise and decompresses it.
-* load_databases.py -> It loads the data (as is) into a 'voters_sqlite.db' sqlite instance.
-* query_databases.py -> Runs the queries for the different database systems.
-
-### Your goal
-Your goal is to load the data into DuckDB, and run the following set of assignments:
-
-**Query Q1:** How many people voted in the elections?
-**Queries Q2:** How many people over 70 can vote in the election?
-**Queries Q3:** What are the three counties with most male, white man over 40 and are they majority democrats or republicans? 
-**Transactions Q1:** Q1, but first delete rows with people who are either below 18 years old or over 120 years old
-
-Run them using both SQLite, DuckDB and Pandas and time the execution of these queries.
+### Task
+Download the .ipynb file [from](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb ) and upload it as a Python 3 Notebook.
+Follow the steps depicted in the python notebook, and compare the performance of these 3 engines on three different tasks. You will load the data, execute different queries (focusing in selections, aggregations and joins) and finally will perform transactions cleaning dirty tuples from our dataset.
 
 ## (2) Implementing Scalar Functions in DuckDB.
 In this assignment, we will implement our own scalar function in DuckDB.
