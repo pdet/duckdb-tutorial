@@ -7,7 +7,7 @@ This tutorial is composed of two exercises. In the first exercise, students will
 For this exercise, you will need a [Google Colab Account](https://colab.research.google.com/).
 
 ### Task
-Download the .ipynb file [from](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb ) and upload it as a Python 3 Notebook.
+Download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb ) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/).
 Follow the steps depicted in the python notebook, and compare the performance of these 3 engines on three different tasks. You will load the data, execute different queries (focusing in selections, aggregations and joins) and finally will perform transactions cleaning dirty tuples from our dataset.
 
 ## (2) Implementing Scalar Functions in DuckDB.
