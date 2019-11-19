@@ -19,7 +19,7 @@ DuckDB requires [CMake](https://cmake.org) to be installed and a `C++11` complia
 ### Building
 The source code can be downloaded from [the DuckDB repository](https://github.com/cwida/duckdb/commits/master). Run the following command to clone the github directory:
 ```bash
-git clone https://github.com/cwida/duckdb/commits/master
+git clone https://github.com/cwida/duckdb
 ```
 
 Alternatively, a zip file with the source code can be downloaded from [here](https://github.com/cwida/duckdb/archive/master.zip).
