@@ -7,8 +7,21 @@ This tutorial is composed of two exercises. In the first exercise, students will
 For this exercise, you will need a [Google Colab Account](https://colab.research.google.com/).
 
 ### Task
-Download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb ) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/).
+Download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/).
 Follow the steps depicted in the python notebook, and compare the performance of these 3 engines on three different tasks. You will load the data, execute different queries (focusing in selections, aggregations and joins) and finally will perform transactions cleaning dirty tuples from our dataset.
+
+### Project Assignment
+Similar to the task described above, you must download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/blob/master/NYC_Cab_DuckDB_Assignment.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/). In this assignment, you will experiment with the NYC Cab dataset from 2016. This dataset provides information (e.g., pickup/dropoff time, # of passengers, trip distance, fare) about cab trips done in New York City during 2016. You can learn more about the dataset clicking [here!](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+
+You will load this dataset into pandas, sqlite, and duckdb. You will compare the performance of multiple data-science like queries, including performing a fare estimation (i.e., predicting how much a ride will cost depending on distance) using machine learning.
+
+In the first section you will implement the loader in duckdb **[5 points].**
+
+The second section has two data-science like queries, the implementation in pandas is already given, and you should use it as a logical/correctness reference to write the queries for sqlite and duckdb, remember to compare the performance of the three different systems **[25 points]**.
+
+Finally, in the third section you will implement a simple machine learning algorithm in duckdb to predict fare costs. A full implementation of pandas is given and a partial of sqlite. Again, use them as a logical/correctness reference and compare the performance of the three different systems. **[40 points]**
+
+Remember to submit your notebook with the answers to all sections as well as a PDF document (max two papes) listing all experienced execution times and reasoning about the performance difference in these systems.
 
 ## (2) Implementing Scalar Functions in DuckDB.
 In this assignment, we will implement our own scalar function in DuckDB.
