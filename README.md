@@ -1,5 +1,5 @@
-# DuckDB Tutorial for SBBD
-This tutorial is composed of two exercises. In the first exercise, students will compare DuckDB,SQLite and Pandas in terms of performance and usability. The second exercise is about implementing a User Defined Function (UDF) inside DuckDB.
+# DuckDB Tutorial
+This tutorial is composed of two exercises. In the first exercise, students will compare DuckDB,SQLite and Pandas in terms of performance and usability. The second exercise is about implementing User Defined Functions (UDFs) inside DuckDB.
 
 ## (1) Using DuckDB.
 
