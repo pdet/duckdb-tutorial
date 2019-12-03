@@ -19,7 +19,7 @@ DuckDB requires [CMake](https://cmake.org) to be installed and a `C++11` complia
 ### Building
 The source code can be downloaded from [the DuckDB repository](https://github.com/cwida/duckdb/commits/master). Run the following command to clone the github directory:
 ```bash
-git clone https://github.com/cwida/duckdb/commits/master
+git clone https://github.com/cwida/duckdb
 ```
 
 Alternatively, a zip file with the source code can be downloaded from [here](https://github.com/cwida/duckdb/archive/master.zip).
@@ -74,8 +74,8 @@ After rebuilding, we can run our test by running the `unittest` program: `build/
 Now that we have created our test, we can add our implementation. The implementation for functions lives in the `src/function/scalar` directory. In this case, we will place our function in the `math` subdirectory. Create the file `src/function/scalar/math/add_one.cpp` and add the following body of code:
 
 ```cpp
-#include "function/scalar/math_functions.hpp"
-#include "common/vector_operations/vector_operations.hpp"
+#include "duckdb/function/scalar/math_functions.hpp"
+#include "duckdb/common/vector_operations/vector_operations.hpp"
 
 using namespace duckdb;
 using namespace std;
@@ -105,7 +105,7 @@ To complete our function definition, we need to add a few more lines of boilerpl
 Register<AddOne>();
 ```
 
-Finally, in the file `function/scalar/math_functions.hpp`, add the following snippet of code:
+Finally, in the file `src/include/duckdb/function/scalar/math_functions.hpp`, add the following snippet of code:
 ```cpp
 struct AddOne {
 	static void RegisterFunction(BuiltinFunctions &set);
