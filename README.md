@@ -7,11 +7,11 @@ This tutorial is composed of two exercises. In the first exercise, students will
 For this exercise, you will need a [Google Colab Account](https://colab.research.google.com/).
 
 ### Task
-Download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/DuckDB_Exercise1.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/).
+Download the .ipynb file from [here](https://raw.githubusercontent.com/pdet/duckdb-tutorial/master/DuckDB_Exercise1.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/).
 Follow the steps depicted in the python notebook, and compare the performance of these 3 engines on three different tasks. You will load the data, execute different queries (focusing in selections, aggregations and joins) and finally will perform transactions cleaning dirty tuples from our dataset.
 
 ### Project Assignment
-Similar to the task described above, you must download the .ipynb file from [here](https://github.com/pdet/duckdb-tutorial/blob/master/NYC_Cab_DuckDB_Assignment.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/). In this assignment, you will experiment with the NYC Cab dataset from 2016. This dataset provides information (e.g., pickup/dropoff time, # of passengers, trip distance, fare) about cab trips done in New York City during 2016. You can learn more about the dataset clicking [here!](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
+Similar to the task described above, you must download the .ipynb file from [here](https://raw.githubusercontent.com/pdet/duckdb-tutorial/master/NYC_Cab_DuckDB_Assignment.ipynb) and upload it as a Python 3 Notebook into [Google Colab](https://colab.research.google.com/). In this assignment, you will experiment with the NYC Cab dataset from 2016. This dataset provides information (e.g., pickup/dropoff time, # of passengers, trip distance, fare) about cab trips done in New York City during 2016. You can learn more about the dataset clicking [here!](https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
 You will load this dataset into pandas, sqlite, and duckdb. You will compare the performance of multiple data-science like queries, including performing a fare estimation (i.e., predicting how much a ride will cost depending on distance) using machine learning.
 
