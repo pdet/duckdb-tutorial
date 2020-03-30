@@ -56,8 +56,8 @@ Alternatively, a zip file with the source code can be downloaded from [here](htt
 
 From now on in this tutorial, we assume you are in the `duckdb/` folder. 
 This is optional, but you may also checkout to the same code branch that we had before coding the funciton of this tutorial, below:
-```
-duckdb$ git checkout a55686784d46fd85ff39a9b3a2b04745759c4dd1
+```bash
+git checkout a55686784d46fd85ff39a9b3a2b04745759c4dd1
 ```
 
 After downloading the source code, the build must be initialized with CMake and the source files must be built. On Linux/OSX, the build can be done by simply using the command `make debug`. On Windows, you must use CMake to generate a Visual Studio project and then use Visual Studio to build that project. Building might take some time depending on how fast your computer is!
