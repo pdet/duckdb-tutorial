@@ -100,7 +100,6 @@ For a `SEQ_SCAN` (sequential scan), for example, it shows how many tuples have b
 These intermediate cardinalities are important because they do a good job of explaining why an operator takes a certain amount of time, and in many cases these intermediates can be avoided or drastically reduced by modifying the way in which a query is executed.
 
 
-
 ```python
 def run_and_profile_query(query):
   con.execute("PRAGMA enable_profiling")
@@ -211,6 +210,45 @@ Hint:
 2. DuckDB always builds the hash table on the *right side* of a hash join.
 3. Filters? Projections?
 
+Another important consideration is that the query optimization should still output the same query result! For that reason, you can use the function below to verify that your result is still correct after optimization.
+
+```python
+import datetime
+expected_result_1 = [(223140, 355369.0698, datetime.date(1995, 3, 14), 0),
+                    (584291, 354494.7318, datetime.date(1995, 2, 21), 0),
+                    (405063, 353125.4577, datetime.date(1995, 3, 3), 0),
+                    (573861, 351238.277, datetime.date(1995, 3, 9), 0),
+                    (554757, 349181.7426, datetime.date(1995, 3, 14), 0),
+                    (506021, 321075.581, datetime.date(1995, 3, 10), 0),
+                    (121604, 318576.4154, datetime.date(1995, 3, 7), 0),
+                    (108514, 314967.0754, datetime.date(1995, 2, 20), 0),
+                    (462502, 312604.542, datetime.date(1995, 3, 8), 0),
+                    (178727, 309728.9306, datetime.date(1995, 2, 25), 0)]
+def profile_and_verify_query(query, expected_results):
+  con.execute("PRAGMA enable_profiling")
+  con.execute("PRAGMA profiling_output='out.log'")
+  results = con.execute(query).fetchall()
+  with open('out.log', 'r') as f:
+    output = f.read()
+  con.execute("PRAGMA disable_profiling")
+  print(output)
+  if len(expected_results) != len(results):
+    print("Incorrect result, expected", expected_results, "but got", results)
+    return False
+  for r in range(len(results)):
+    if len(results[r]) != len(expected_results[r]):
+      print("Incorrect result, expected", expected_results, "but got", results)
+      return False
+    for c in range(len(results[r])):
+      if results[r][c] != expected_results[r][c]:
+        print("Incorrect result, expected", expected_results, "but got", results)
+        return False
+  return True
+
+def profile_and_verify_1(query):
+  return profile_and_verify_query(query, expected_result_1)
+```
+
 ```python
 query = """
 SELECT
@@ -278,7 +316,7 @@ ORDER BY
 
 
 # HINT: first replace the cross products with joins before running this query!
-# run_and_profile_query(query)
+# profile_and_verify_1(query)
 ```
 
 ## Extra: Writing a String scalar UDF
