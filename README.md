@@ -1,6 +1,8 @@
 # DuckDB Tutorial
 This tutorial is composed of two exercises. In the first exercise, students will compare DuckDB,SQLite and Pandas in terms of performance and usability. The second exercise is about playing around with query execution and the query optimizer in DuckDB.
 
+* The Exercise 2 Colab can be found [here](https://colab.research.google.com/drive/1HMtihjak75QBXfSOswsOyJyANnlH3Qmn#scrollTo=x4UIW8GUQaqt).
+
 ### Requirements
 For these exercise, you will need a [Google Colab Account](https://colab.research.google.com/).
 
@@ -32,73 +34,169 @@ Download the .ipynb file from [here](https://raw.githubusercontent.com/pdet/duck
 ### Local Execution
 For those who would rather run the tutorial locally, below are the contents of the IPython notebook repeated:
 
-#### Setup
-First we need to install DuckDB:
-```bash
-pip install duckdb --pre
-```
+# **SETUP**
 
-#### Loading The Data
+First we need to install DuckDB.
 ```python
-import urllib.request
-import zipfile
-
-print("Downloading datasets")
-
-urllib.request.urlretrieve("https://github.com/Mytherin/datasets/raw/main/tpch_sf01.zip", "tpch_sf01.zip")
-
-print("Decompressing files")
-
-with zipfile.ZipFile("tpch_sf01.zip","r") as zip_ref:
-	zip_ref.extractall("./")
-
-print("Finished.")
+!pip install duckdb --pre
 ```
 
-#### Load Data in DuckDB
+# **Loading The Data**
+
+We will work with a generated dataset from the TPC-H benchmark. DuckDB has built-in support for generating the dataset using the `dbgen` procedure.
+
+We create an in-memory database and generate the data inside DuckDB using the following code snippet.
+
 ```python
 import duckdb
 con = duckdb.connect(':memory:')
-
-queries = []
-with open('tpch_sf01/schema.sql', 'r') as f:
-  queries += [x for x in f.read().split(';') if len(x.strip()) > 0]
-with open('tpch_sf01/load.sql', 'r') as f:
-  queries += [x for x in f.read().split(';') if len(x.strip()) > 0]
-
-print("Beginning data load")
-for q in queries:
-  con.execute(q)
-print("Finishing data load")
+con.execute("CALL dbgen(sf=0.1)")
 ```
 
-#### Inspecting the Query Plan
-The query plan of a query can be inspected by prefixing the query with`explain`. By default, only the physical query plan is returned. You can use `PRAGMA explain_output='all'` to output the unoptimized logical plan, the optimized logical plan and the physical plan instead
+# **Inspecting the Dataset**
+
+The dataset consists of eight tables. We can see which tables are present in the database using the `SHOW TABLES` command.
+
+Note that we append `.df()` to the query, this fetches the result as a Pandas DataFrame which renders nicely in Colab.
+
+```python
+con.execute("SHOW TABLES").df()
+```
+
+Using the `DESCRIBE` command, we can inspect the columns that are present in each of the tables. For example, we can inspect the lineitem table as follows:```
+
+```python
+con.execute("DESCRIBE lineitem").df()
+```
+
+We can use the `LIMIT` clause to inspect the first few rows of the lineitem table and display them.```
+
+```python
+con.execute("SELECT * FROM lineitem LIMIT 10").df()
+```
+
+To get a better feeling of what a table contains, we can use the `SUMMARIZE` command. This prints out several statistics about each of the columns of the table, such as the min and max value, how many unique values there are, the average value in the column, etc.```
+
+```python
+con.execute("SUMMARIZE lineitem").df()
+```
+
+# **Testing and Benchmarking**
+
+Let us start our assignment by running a microbenchmark against the TPC-H dataset.
+
+In order to make the benchmarking more interesting, let's compare against the SQLite database. This is a typical OLTP (transactional) database that is included along with every Python installation.
+
+### **SQLite Setup**
+
+We start out by creating a new in-memory database, just as we did in DuckDB.
+
+```python
+import sqlite3
+sqlite_con = sqlite3.connect(':memory:', check_same_thread=False)
+```
+
+We can transfer the data from DuckDB to SQLite using a Pandas DataFrame as well. First, we export the data from DuckDB into a Pandas DataFrame using the `.df()` command. Then we use the `to_sql` function to write the data to our SQLite database.```
+
+```python
+table_list = con.execute("SHOW TABLES").fetchall()
+
+for table in table_list:
+  tname = table[0]
+  table_data = con.table(tname).df()
+  table_data.to_sql(tname, sqlite_con)
+```
+
+# **Running the Benchmark**
+
+We have created a query down below which resembles a (simplified) query from the TPC-H benchmark:
+
+```python
+
+query = """
+SELECT
+    l_orderkey,
+    sum(l_extendedprice * (1 - l_discount)) AS revenue,
+    o_orderdate,
+    o_shippriority
+FROM
+    customer
+    JOIN orders ON (c_custkey=o_custkey)
+    JOIN lineitem ON (l_orderkey=o_orderkey)
+WHERE
+    c_mktsegment = 'BUILDING'
+    AND o_orderdate < CAST('1995-03-15' AS date)
+    AND l_shipdate > CAST('1995-03-15' AS date)
+GROUP BY
+    l_orderkey,
+    o_orderdate,
+    o_shippriority
+ORDER BY
+    revenue DESC,
+    o_orderdate
+LIMIT 10;
+"""
+
+```
+
+Let's run the query in both SQLite and in DuckDB and measure the execution time.
+
+```python
+
+import time
+import pandas as pd
+
+
+def run_query(con_obj, q):
+  start = time.time()
+  con_obj.execute(q).fetchall()
+  end = time.time()
+  return(str(round(end - start,3)) + 's')
+
+duckdb_results = [run_query(con, query)]
+sqlite_results = [run_query(sqlite_con, query)]
+
+pd.DataFrame.from_dict({
+    'DuckDB': duckdb_results,
+    'SQLite': sqlite_results
+})
+
+```
+
+Using the `PRAGMA disable_optimizer` we can also disable the query optimizer of DuckDB, and re-run the query. In this manner we can see the performance effect that query optimization has on our query.```
+
+```python
+con.execute("PRAGMA disable_optimizer")
+duckdb_unoptimized_results = [run_query(con, query)]
+con.execute("PRAGMA enable_optimizer")
+
+pd.DataFrame.from_dict({
+    'DuckDB': duckdb_results,
+    'DuckDB (Unoptimized)': duckdb_unoptimized_results,
+    'SQLite': sqlite_results
+})
+
+```
+
+# **Inspecting the Query Plan**
+The query plan of a query can be inspected by prefixing the query with`EXPLAIN`. By default, only the physical query plan is returned. You can use `PRAGMA explain_output='all'` to output the unoptimized logical plan, the optimized logical plan and the physical plan as well.
 
 ```python
 def explain_query(query):
   print(con.execute("EXPLAIN " + query).fetchall()[0][1])
 
-query = """
-SELECT l_orderkey, SUM(l_extendedprice)
-FROM lineitem
-WHERE l_discount < 5
-GROUP BY l_orderkey
-ORDER BY l_orderkey DESC;
-"""
-
 explain_query(query)
+
 ```
 
-#### Profiling Queries
+# **Profiling Queries**
 Rather than only viewing the query plan, we can also run the query and look at the profile output. The function `run_and_profile_query` below performs this profiling by enabling the profiling, writing the profiling output to a file, and then printing the contents of that file to the console.
 
-The profiler output shows extra information for every operator; namely how much time was spent executing that operator, and how many tuples have moved from that operator to the operator above it.
+The profiler output shows extra information for every operator; namely how much time was spent executing that operator, and how many tuples have moved from that operator to the operator above it. 
 
-For a `SEQ_SCAN` (sequential scan), for example, it shows how many tuples have been read from the base table. For a `FILTER`, it shows how many tuples have passed the filter predicate. For a `HASH_GROUP_BY`, it shows how many groups were created and aggregated.
+For a `SEQ_SCAN` (sequential scan), for example, it shows how many tuples have been read from the base table. For a `FILTER`, it shows how many tuples have passed the filter predicate. For a``HASH_GROUP_BY`, it shows how many groups were created and aggregated.
 
 These intermediate cardinalities are important because they do a good job of explaining why an operator takes a certain amount of time, and in many cases these intermediates can be avoided or drastically reduced by modifying the way in which a query is executed.
-
 
 
 ```python
@@ -106,30 +204,26 @@ def run_and_profile_query(query):
   con.execute("PRAGMA enable_profiling")
   con.execute("PRAGMA profiling_output='out.log'")
   con.execute(query)
+  con.execute("PRAGMA disable_profiling")
   with open('out.log', 'r') as f:
     output = f.read()
-  con.execute("PRAGMA disable_profiling")
   print(output)
-
-query = """
-SELECT l_orderkey, SUM(l_extendedprice)
-FROM lineitem
-WHERE l_discount < 5
-GROUP BY l_orderkey
-ORDER BY l_orderkey DESC;
-"""
-
+  
 run_and_profile_query(query)
 ```
 
-#### Query Optimizations
+# **Query Optimizations**
+
 An important component of a database system is the optimizer. The optimizer changes the query plan so that it is logically equivalent to the original plan, but (hopefully) executes much faster.
+
 In an ideal world, the optimizer allows the user not to worry about how to formulate a query: the user only needs to describe what result they want to see, and the database figures out the most efficient way of retrieving that result.
+
 In practice, this is certainly not always true, and in some situations it is necessary to rephrase a query. Nevertheless, optimizers generally do a very good job at optimizing queries, and save users a lot of time in manually reformulating queries.
+
 Let us run the following query and see how it performs:
 
 ```python
-query = """
+unoptimized_query = """
 SELECT
     l_orderkey,
     sum(l_extendedprice * (1 - l_discount)) AS revenue,
@@ -155,24 +249,25 @@ ORDER BY
 LIMIT 10;
 """
 
-run_and_profile_query(query)
+run_and_profile_query(unoptimized_query)
+
 ```
 
-#### Manual Query Optimizations
-
+# **Manual Query Optimizations**
 
 In order to get a better idea of how query optimizers work, we are going to perform *manual* query optimization. In order to do that, we will disable all query optimizers in DuckDB, which means the query will run *as-is*. We can then change the way the query is physically executed by altering the query. Let's try to disable the optimizer and looking at the query plan:
 
 ```python
-con.execute("PRAGMA disable_optimizer")
-explain_query(query)
+# con.execute("PRAGMA disable_optimizer")
+explain_query(unoptimized_query)
 ```
 
-Looking at the plan you now see that the hash joins that were used before are replaced by cross products followed by a filter. This is what was literally written in the query, however, cross products are extremely expensive! We could run this query, but because of the cross products it will take extremely long.
+Looking at the plan you now see that the hash joins that were used before are replaced by cross products followed by a filter. This is what was literally written in the query, however, cross products are extremely expensive! We could run this query, but because of the cross products it will take extremely long. 
 
 Let's rewrite the query to explicitly use joins instead, and then we can actually run it:
 
 ```python
+
 query = """
 SELECT
     l_orderkey,
@@ -201,7 +296,7 @@ run_and_profile_query(query)
 
 ```
 
-##### Assignment
+# **Assignment**
 
 Now the query actually finishes; however, it is still much slower than before. There are more changes that can be made to the query to make it run faster. Your assignment (and challenge!) is to adjust the query so that it runs in similar speed to the query with optimizations enabled. You will be the human query optimizer replacing the disabled one.
 
@@ -211,7 +306,10 @@ Hint:
 2. DuckDB always builds the hash table on the *right side* of a hash join.
 3. Filters? Projections?
 
+Another important consideration is that the query optimization should still output the same query result! An optimizer that changes the query result is incorrect and is considered a bug.
+
 ```python
+
 query = """
 SELECT
     l_orderkey,
@@ -237,12 +335,21 @@ LIMIT 10;
 """
 
 run_and_profile_query(query)
+
 ```
 
-##### Bonus Assignment
-As a bonus assignment, here is another query that you can optimize. Note that this query is currently NOT fully optimized by DuckDB because of a problem in the query optimizer, hence on this query it is actually possible to not only match, but beat the DuckDB query optimizer!
+# **Bonus Assignment 1**
+
+The TPC-H queries can be loaded from DuckDB using the query `SELECT * FROM tpch_queries()`. Run all the queries in both DuckDB and SQLite and compare the results.
+
+Note: Not all queries will work as-is in SQLite, and some might need to be (slightly) rewritten to accomodate SQLite's (more limited) SQL dialect.
+
+# **Bonus Assignment 2**
+
+As a bonus assignment, here is another query that you can optimize.
 
 ```python
+
 query = """
 SELECT
     nation,
@@ -277,6 +384,5 @@ ORDER BY
 """
 
 
-# HINT: first replace the cross products with joins before running this query!
-# run_and_profile_query(query)
+run_and_profile_query(query)
 ```
